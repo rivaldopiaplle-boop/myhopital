@@ -1,0 +1,5 @@
+# nom;prenom;dateNaissance;sexe;telephone;email;rue;codePostal;ville;pays;moyenContact;etatPatient;openDossier;etatDossier
+Traore;Ibrahim;1995-07-04;HOMME;770000002;ibrahim.traore@hopital.local;Rue 2;20000;Ville;Pays;SMS;ACTIF;OUI;OUVERT
+Diallo;Awa;1988-03-12;FEMME;770000010;awa.diallo@hopital.local;Rue 5;10001;Ville;Pays;EMAIL;ACTIF;OUI;OUVERT
+Kone;Issa;1979-11-02;HOMME;770000011;issa.kone@hopital.local;Rue 9;10002;Ville;Pays;APPEL;INACTIF;OUI;FERME
+Bah;Mariama;2001-01-22;FEMME;770000012;mariama.bah@hopital.local;Rue 11;10003;Ville;Pays;WHATSAPP;ACTIF;OUI;OUVERT

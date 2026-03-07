@@ -1,0 +1,5 @@
+# nom;prenom;dateNaissance;sexe;telephone;email;rue;codePostal;ville;pays;moyenContact;specialite
+Dia;Mariam;1986-03-12;FEMME;770000001;mariam.dia@hopital.local;Rue 1;10000;Ville;Pays;EMAIL;GENERALISTE
+Sarr;Ousmane;1975-09-20;HOMME;770000021;ousmane.sarr@hopital.local;Rue 8;10004;Ville;Pays;SMS;CARDIOLOGIE
+Ndiaye;Fatou;1990-05-14;FEMME;770000022;fatou.ndiaye@hopital.local;Rue 12;10005;Ville;Pays;APPEL;PEDIATRIE
+Ba;Cheikh;1982-12-10;HOMME;770000023;cheikh.ba@hopital.local;Rue 7;10006;Ville;Pays;EMAIL;RADIOLOGIE

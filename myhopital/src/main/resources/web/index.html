@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyHopital - Welcome</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <nav class="nav">
+        <div class="logo">MyHopital</div>
+        <div class="nav-actions">
+          <a href="#login" class="btn ghost">Sign in</a>
+          <a href="#register" class="btn">Create account</a>
+        </div>
+      </nav>
+      <div class="hero-content">
+        <div class="hero-text">
+          <p class="eyebrow">Next-generation care platform</p>
+          <h1>Precision care, shared intelligence, real-time coordination.</h1>
+          <p class="lead">
+            MyHopital connects doctors, dossiers, and appointments in one secure flow.
+            Fast scheduling, reliable histories, and patient-first decisions.
+          </p>
+          <div class="hero-cta">
+            <a class="btn" href="#register">Start now</a>
+            <a class="btn ghost" href="#features">See features</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h2>Access portal</h2>
+          <p>Choose your workspace and keep the hospital synchronized.</p>
+          <div class="mini-grid">
+            <div class="mini">Director</div>
+            <div class="mini">Gestionnaire</div>
+            <div class="mini">Doctor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="features" class="section">
+      <div class="container">
+        <h2>What you get</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Unified dossiers</h3>
+            <p>Separate consultation and medical documents while keeping a single patient timeline.</p>
+          </article>
+          <article class="card">
+            <h3>Smart scheduling</h3>
+            <p>Instant availability updates for doctors and patients with conflict prevention.</p>
+          </article>
+          <article class="card">
+            <h3>Role precision</h3>
+            <p>Doctors access care flows without touching doctor or patient management.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="login" class="section split">
+      <div class="container split">
+        <div class="panel">
+          <h2>Sign in</h2>
+          <form class="form">
+            <label>Email <span class="req">*</span>
+              <input type="email" name="email" autocomplete="email" placeholder="name@hospital.com" required />
+            </label>
+            <label>Password <span class="req">*</span>
+              <input type="password" name="password" autocomplete="current-password" placeholder="Your password" required />
+            </label>
+            <div class="row">
+              <button type="submit" class="btn">Sign in</button>
+              <a class="link" href="#reset">Forgot password?</a>
+            </div>
+          </form>
+        </div>
+        <div class="panel accent">
+          <h3>Secure by design</h3>
+          <p>Audit trails, protected access, and clean responsibilities for every role.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="register" class="section">
+      <div class="container">
+        <h2>Create account</h2>
+        <form class="form grid-form">
+          <label>Last name <span class="req">*</span>
+            <input type="text" name="lastName" autocomplete="family-name" placeholder="Traore" required />
+          </label>
+          <label>First name <span class="req">*</span>
+            <input type="text" name="firstName" autocomplete="given-name" placeholder="Ibrahim" required />
+          </label>
+          <label>Date of birth <span class="req">*</span>
+            <input type="date" name="birthdate" autocomplete="bday" required />
+          </label>
+          <label>Email <span class="req">*</span>
+            <input type="email" name="email" autocomplete="email" placeholder="ibrahim@hopital.com" required />
+          </label>
+          <label>Phone
+            <input type="tel" name="phone" autocomplete="tel" placeholder="+221 77 000 00 00" />
+          </label>
+          <label>Gender
+            <select name="gender" autocomplete="sex">
+              <option value="">Select...</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>Address
+            <input type="text" name="address" autocomplete="street-address" placeholder="Street, city, country" />
+          </label>
+          <label>Preferred contact
+            <select name="preferredContact">
+              <option value="">Select...</option>
+              <option>Email</option>
+              <option>SMS</option>
+              <option>Call</option>
+              <option>WhatsApp</option>
+            </select>
+          </label>
+          <label>Password <span class="req">*</span>
+            <input type="password" name="password" autocomplete="new-password" placeholder="Create a password" required />
+          </label>
+          <label>Confirm password <span class="req">*</span>
+            <input type="password" name="confirmPassword" autocomplete="new-password" placeholder="Confirm password" required />
+          </label>
+          <div class="row">
+            <button type="submit" class="btn">Register</button>
+            <span class="note">Fields marked with * are mandatory.</span>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>MyHopital - care that moves with your team.</p>
+    </div>
+  </footer>
+</body>
+</html>
