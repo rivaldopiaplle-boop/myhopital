@@ -1,0 +1,79 @@
+name: Version
+
+# Une etiquette v* publie l'application a telecharger : Windows (dossier a
+# decompresser, MyHopital.exe) et Linux (paquet .deb). Java est embarque :
+# rien a installer d'autre.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  paquets:
+    name: Paquet ${{ matrix.systeme }}
+    strategy:
+      matrix:
+        include:
+          - systeme: windows
+            machine: windows-latest
+          - systeme: linux
+            machine: ubuntu-latest
+    runs-on: ${{ matrix.machine }}
+    defaults:
+      run:
+        working-directory: myhopital
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Tester, puis rassembler le jar et ses dependances
+        run: |
+          mvn -B package
+          cp target/myhopital-*.jar target/libs/
+
+      - name: Windows, application autonome
+        if: matrix.systeme == 'windows'
+        run: |
+          jpackage --type app-image --name MyHopital --input target/libs \
+            --main-jar "$(basename target/libs/myhopital-*.jar)" \
+            --main-class com.rivaldo.hopital.Main --dest target/dist
+          cd target/dist && 7z a ../MyHopital-windows.zip MyHopital > /dev/null
+
+      - name: Linux, paquet .deb
+        if: matrix.systeme == 'linux'
+        run: |
+          jpackage --type deb --name myhopital --app-version "${GITHUB_REF_NAME#v}" \
+            --input target/libs --main-jar "$(basename target/libs/myhopital-*.jar)" \
+            --main-class com.rivaldo.hopital.Main --linux-shortcut --dest target
+          mv target/myhopital_*.deb target/MyHopital-linux.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paquet-${{ matrix.systeme }}
+          path: myhopital/target/MyHopital-*
+
+  publication:
+    name: Publier la version
+    needs: [paquets]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: paquets
+          merge-multiple: true
+
+      - name: Creer la version et y joindre les paquets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" paquets/* --repo "$GITHUB_REPOSITORY" \
+            --title "MyHopital $GITHUB_REF_NAME" \
+            --notes "Windows : decompresser MyHopital-windows.zip, puis lancer MyHopital.exe. Linux : sudo apt install ./MyHopital-linux.deb. Comptes de demonstration dans le README."

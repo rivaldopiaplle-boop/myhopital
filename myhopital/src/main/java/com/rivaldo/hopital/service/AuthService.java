@@ -9,6 +9,7 @@ import com.rivaldo.hopital.exception.ValidationException;
 import com.rivaldo.hopital.repository.DataStore;
 import com.rivaldo.hopital.repository.DatabaseRepository;
 import com.rivaldo.hopital.util.IdGenerator;
+import com.rivaldo.hopital.util.MotDePasse;
 import com.rivaldo.hopital.util.RandomCodeUtils;
 
 import java.time.LocalDateTime;
@@ -73,15 +74,26 @@ public class AuthService {
         // Étape 3: Créer le nouvel utilisateur
         // On crée un objet Utilisateur avec toutes les informations fournies
         // IdGenerator.newId() génère un identifiant unique (comme un numéro de série)
-        Utilisateur user = new Utilisateur(IdGenerator.newId(), nom, prenom, email, motDePasse, role,
+        // Le mot de passe n'est jamais stocke en clair : seul son hache PBKDF2 l'est.
+        String hache = MotDePasse.hacher(motDePasse != null ? motDePasse.trim() : "");
+        Utilisateur user = new Utilisateur(IdGenerator.newId(), nom, prenom, email, hache, role,
                 dateNaissance, telephone, sexe, adresse, moyenContact);
         
-        // Étape 4: Gestion spéciale pour les directeurs
-        // Si c'est un DIRECTEUR et qu'il y a déjà un directeur principal
-        if (role == Role.DIRECTEUR && hasPrimaryDirector()) {
-            // Le nouveau directeur doit être approuvé par le directeur principal
+        // Étape 4: Un directeur inscrit alors qu'un directeur principal existe
+        // doit etre approuve par celui-ci avant de pouvoir se connecter.
+        boolean enAttente = role == Role.DIRECTEUR && hasPrimaryDirector();
+        if (enAttente) {
             user.setApproved(false);
-            
+        }
+
+        // Étape 5: Enregistrer l'utilisateur AVANT sa demande d'approbation :
+        // la table director_approvals le reference par cle etrangere, et
+        // l'ordre inverse faisait echouer l'inscription d'un second directeur.
+        dataStore.getUtilisateurs().add(user);
+        databaseRepository.insertUtilisateur(user);
+
+        // Étape 6: Creer la demande d'approbation et prevenir le directeur principal
+        if (enAttente) {
             // Générer un code d'approbation à 6 chiffres (exemple: 123456)
             String code = RandomCodeUtils.numericCode(6);
             
@@ -98,11 +110,7 @@ public class AuthService {
             databaseRepository.insertAdminNotification(notification);
         }
         
-        // Étape 5: Ajouter l'utilisateur dans la liste de tous les utilisateurs
-        dataStore.getUtilisateurs().add(user);
-        databaseRepository.insertUtilisateur(user);
-        
-        // Étape 6: Retourner l'utilisateur créé
+        // Étape 7: Retourner l'utilisateur créé
         return user;
     }
 
@@ -118,24 +126,22 @@ public class AuthService {
         String cleanEmail = email != null ? email.trim() : "";
         String cleanPassword = motDePasse != null ? motDePasse.trim() : "";
         
-        // On cherche dans TOUS les utilisateurs enregistrés
-        return dataStore.getUtilisateurs().stream()
-                // Filtre 1: L'email doit correspondre (sans tenir compte des majuscules/minuscules)
-                // Exemple: "Admin@Hopital.com" = "admin@hopital.com"
+        // On cherche l'utilisateur par email (sans tenir compte des majuscules),
+        // puis on verifie le mot de passe contre son hache.
+        Optional<Utilisateur> trouve = dataStore.getUtilisateurs().stream()
                 .filter(user -> user.getEmail().equalsIgnoreCase(cleanEmail))
-                
-                // Filtre 2: Le mot de passe doit être EXACTEMENT identique
-                // ⚠️ ATTENTION: "admin" ≠ "Admin" (les majuscules comptent ici)
-                // ✅ CORRECTION: On compare avec le mot de passe nettoyé (sans espaces)
-                .filter(user -> user.getMotDePasse().trim().equals(cleanPassword))
-                
-                // Filtre 3: L'utilisateur doit être approuvé
-                // OU ne pas être un directeur (les autres rôles n'ont pas besoin d'approbation)
+                .filter(user -> MotDePasse.verifier(cleanPassword, user.getMotDePasse()))
+                // Un directeur doit avoir ete approuve ; les autres roles n'en ont pas besoin
                 .filter(user -> user.isApproved() || user.getRole() != Role.DIRECTEUR)
-                
-                // Résultat: On retourne le PREMIER utilisateur qui correspond à tous les filtres
-                // Si aucun utilisateur ne correspond, on retourne Optional.empty()
                 .findFirst();
+
+        // Une base creee avant le hachage garde des mots de passe en clair :
+        // a la premiere connexion reussie, on les remplace par leur hache.
+        trouve.filter(user -> !MotDePasse.estHache(user.getMotDePasse())).ifPresent(user -> {
+            user.setMotDePasse(MotDePasse.hacher(cleanPassword));
+            databaseRepository.updateUtilisateur(user);
+        });
+        return trouve;
     }
 
     /**
@@ -258,7 +264,7 @@ public class AuthService {
         
         // Étape 3: Changer le mot de passe de l'utilisateur
         findByEmail(email).ifPresent(user -> {
-            user.setMotDePasse(newPassword);
+            user.setMotDePasse(MotDePasse.hacher(newPassword != null ? newPassword.trim() : ""));
             databaseRepository.updateUtilisateur(user);
         });
         
@@ -289,13 +295,13 @@ public class AuthService {
         // ⚠️ IMPORTANT: On utilise equals() qui compare EXACTEMENT
         // "admin" ≠ "Admin" (les majuscules comptent)
         // ✅ CORRECTION: On compare avec les mots de passe nettoyés
-        if (user.isEmpty() || !user.get().getMotDePasse().trim().equals(cleanCurrent)) {
+        if (user.isEmpty() || !MotDePasse.verifier(cleanCurrent, user.get().getMotDePasse())) {
             // Si l'utilisateur n'existe pas OU si le mot de passe actuel est incorrect
             return false;
         }
         
         // Étape 3: Changer le mot de passe (on stocke le mot de passe nettoyé)
-        user.get().setMotDePasse(cleanNext);
+        user.get().setMotDePasse(MotDePasse.hacher(cleanNext));
         databaseRepository.updateUtilisateur(user.get());
         
         // Étape 4: Retourner true pour indiquer que le changement a réussi

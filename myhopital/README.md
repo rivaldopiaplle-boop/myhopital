@@ -2,6 +2,38 @@
 
 Prototype desktop de gestion d'hopital en JavaFX. L'application couvre l'authentification avec roles, la gestion des patients et medecins, les rendez-vous, les consultations, les dossiers medicaux et les documents. Elle est pensee pour l'apprentissage : architecture claire, separation des couches, donnees de demonstration et base SQLite locale.
 
+[![Tests](https://github.com/rivaldopiaplle-boop/myhopital/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rivaldopiaplle-boop/myhopital/actions/workflows/ci.yml)
+
+**Telecharger** : page [Releases](https://github.com/rivaldopiaplle-boop/myhopital/releases/latest).
+Windows : decompresser `MyHopital-windows.zip`, puis lancer `MyHopital.exe`. Linux :
+`sudo apt install ./MyHopital-linux.deb`. Java est embarque : rien d'autre a installer.
+
+Portfolio : https://git-portfolio-rivaldo.vercel.app/projets/hopital-java
+
+![Rendez-vous](docs/captures/onglet-rendez-vous.png)
+
+| Connexion | Patients |
+|---|---|
+| ![Connexion](docs/captures/connexion.png) | ![Patients](docs/captures/onglet-patients.png) |
+
+---
+
+## 0) Qualite : ce qui est verifie
+
+- **Mots de passe haches** avec PBKDF2-HMAC-SHA256 (fourni par Java), un sel par compte,
+  comparaison en temps constant. Une base creee avant le hachage reste utilisable : le
+  mot de passe en clair est remplace par son hache a la premiere connexion reussie.
+- **11 tests JUnit**, dont 6 contre une vraie base SQLite temporaire : hachage,
+  connexion, changement de mot de passe, approbation d'un second directeur, emails
+  refuses. Ils tournent a chaque poussee (GitHub Actions).
+- **Un defaut trouve par les tests** : l'inscription d'un second directeur echouait,
+  car sa demande d'approbation etait enregistree avant lui (cle etrangere). L'ordre
+  est corrige.
+- **Versions publiees automatiquement** : une etiquette `v*` construit, avec `jpackage`,
+  l'application Windows et le paquet Linux, et les joint a la version.
+- **Captures reproductibles** : `CaptureEcrans` (code de test) monte l'application sur
+  une base temporaire et photographie chaque ecran.
+
 ---
 
 ## 1) Ce que fait le projet
@@ -59,7 +91,7 @@ Conseils :
 ## 5) Donnees et base SQLite
 
 ### Stockage
-- La base SQLite est creee automatiquement dans myhopital.db a la racine du projet.
+- La base SQLite est creee automatiquement dans myhopital.db, dans le dossier de lancement. Elle n'est pas versionnee : supprimee, elle se recree avec les donnees de demonstration.
 - Au premier demarrage (base vide), les CSV sont importes puis la base devient persistante.
 - Les listes en memoire (ObservableList) servent a l'affichage et a la reactivite de l'UI.
 
@@ -133,12 +165,13 @@ Ajouts supplementaires :
 
 ---
 
-## 8) Prochaines etapes conseillees
+## 8) Commandes utiles
 
-- Lire DEMARRAGE_RAPIDE.md pour comprendre le flux de base
-- Lire EXPLICATION_COMPLETE_PROJET.md pour la logique metier
-- Parcourir GUIDE_PROJET_COMPLET.md pour chaque fichier
-- Utiliser SCHEMAS_VISUELS.md pour visualiser les flux
+```bash
+mvn -B verify                      # compiler et jouer les tests
+mvn -q -DskipTests javafx:run      # lancer l'application
+mvn -B package                     # jar et dependances dans target/libs (pour jpackage)
+```
 
 ---
 

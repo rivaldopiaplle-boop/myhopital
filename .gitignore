@@ -1,0 +1,5 @@
+# Base SQLite locale : recreee au demarrage avec les donnees de demonstration
+*.db
+
+# Construction Maven
+myhopital/target/

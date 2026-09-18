@@ -1,0 +1,25 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    name: Compiler et tester
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: myhopital
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      # Les tests tournent contre une vraie base SQLite, creee dans un dossier temporaire.
+      - run: mvn -B verify
