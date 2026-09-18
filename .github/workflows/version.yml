@@ -58,7 +58,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: paquet-${{ matrix.systeme }}
-          path: myhopital/target/MyHopital-*
+          path: myhopital/target/MyHopital-${{ matrix.systeme }}.*
 
   publication:
     name: Publier la version
